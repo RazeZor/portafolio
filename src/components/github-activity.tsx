@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, GitCommit, Github } from "lucide-react";
+import { ArrowUpRight, GitCommit, Github, Star } from "lucide-react";
+import {
+  EXCLUDED_REPO_NAMES,
+  FEATURED_REPOS,
+  repoFullName,
+  repoUrl,
+  type FeaturedRepo,
+} from "@/data/github-repos";
 
 const USERNAME = "RazeZor";
 
@@ -15,10 +22,30 @@ type GitHubEvent = {
     ref?: string;
   };
 };
+type GitHubRepoMeta = {
+  stargazers_count: number;
+  fork: boolean;
+  archived: boolean;
+};
 
 type ContributionsResponse = {
   contributions: ContributionDay[];
   total: Record<string, number>;
+};
+
+type FeaturedRepoCard = FeaturedRepo & {
+  stars: number;
+  href: string;
+  fullName: string;
+};
+
+const LANGUAGE_COLORS: Record<string, string> = {
+  TypeScript: "bg-blue-500/15 text-blue-300",
+  Python: "bg-yellow-500/15 text-yellow-200",
+  Astro: "bg-orange-500/15 text-orange-200",
+  Kotlin: "bg-purple-500/15 text-purple-200",
+  HTML: "bg-red-500/15 text-red-200",
+  JavaScript: "bg-amber-500/15 text-amber-200",
 };
 
 function formatRelative(dateStr: string) {
@@ -29,6 +56,11 @@ function formatRelative(dateStr: string) {
   if (days < 7) return `hace ${days} días`;
   if (days < 30) return `hace ${Math.floor(days / 7)} sem.`;
   return new Date(dateStr).toLocaleDateString("es-CL", { day: "numeric", month: "short" });
+}
+
+function isExcludedRepo(repoName: string) {
+  const short = repoName.split("/").pop() ?? repoName;
+  return EXCLUDED_REPO_NAMES.has(short);
 }
 
 function Heatmap({ days }: { days: ContributionDay[] }) {
@@ -86,10 +118,55 @@ function Heatmap({ days }: { days: ContributionDay[] }) {
   );
 }
 
+function FeaturedRepoGrid({ repos }: { repos: FeaturedRepoCard[] }) {
+  return (
+    <div>
+      <p className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <Github className="h-3.5 w-3.5" /> Repos destacados
+      </p>
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {repos.map((repo) => (
+          <li key={repo.fullName}>
+            <a
+              href={repo.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex h-full flex-col rounded-lg border border-border bg-background/40 px-3.5 py-3 transition-colors hover:border-accent/30 hover:bg-background/70"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-medium text-foreground/90 group-hover:text-foreground">
+                  {repo.name}
+                </p>
+                {repo.stars > 0 && (
+                  <span className="inline-flex shrink-0 items-center gap-0.5 text-xs text-muted-foreground">
+                    <Star className="h-3 w-3" />
+                    {repo.stars}
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 line-clamp-2 flex-1 text-xs leading-relaxed text-muted-foreground">
+                {repo.description}
+              </p>
+              <span
+                className={`mt-2 inline-flex w-fit rounded-md px-2 py-0.5 text-[10px] font-medium ${
+                  LANGUAGE_COLORS[repo.language] ?? "bg-surface-2 text-muted-foreground"
+                }`}
+              >
+                {repo.language}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function GitHubActivity() {
   const [user, setUser] = useState<GitHubUser | null>(null);
   const [contributions, setContributions] = useState<ContributionDay[]>([]);
   const [events, setEvents] = useState<GitHubEvent[]>([]);
+  const [featuredRepos, setFeaturedRepos] = useState<FeaturedRepoCard[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -97,10 +174,13 @@ export function GitHubActivity() {
 
     async function load() {
       try {
-        const [userRes, contribRes, eventsRes] = await Promise.all([
+        const [userRes, contribRes, eventsRes, ...repoMetas] = await Promise.all([
           fetch(`https://api.github.com/users/${USERNAME}`),
           fetch(`https://github-contributions-api.jogruber.de/v4/${USERNAME}?y=last`),
-          fetch(`https://api.github.com/users/${USERNAME}/events/public?per_page=12`),
+          fetch(`https://api.github.com/users/${USERNAME}/events/public?per_page=30`),
+          ...FEATURED_REPOS.map((repo) =>
+            fetch(`https://api.github.com/repos/${repoFullName(repo, USERNAME)}`),
+          ),
         ]);
 
         if (cancelled) return;
@@ -112,10 +192,44 @@ export function GitHubActivity() {
         }
         if (eventsRes.ok) {
           const data: GitHubEvent[] = await eventsRes.json();
-          setEvents(data.filter((e) => e.type === "PushEvent").slice(0, 6));
+          setEvents(
+            data
+              .filter((e) => e.type === "PushEvent" && !isExcludedRepo(e.repo.name))
+              .slice(0, 6),
+          );
         }
+
+        const resolvedCards = await Promise.all(
+          FEATURED_REPOS.map(async (repo, i) => {
+            const metaRes = repoMetas[i];
+            let stars = 0;
+            if (metaRes?.ok) {
+              try {
+                const meta: GitHubRepoMeta = await metaRes.json();
+                stars = meta.stargazers_count ?? 0;
+              } catch {
+                /* ignore */
+              }
+            }
+            return {
+              ...repo,
+              stars,
+              href: repoUrl(repo, USERNAME),
+              fullName: repoFullName(repo, USERNAME),
+            };
+          }),
+        );
+
+        setFeaturedRepos(resolvedCards);
       } catch {
-        /* fallback silencioso */
+        setFeaturedRepos(
+          FEATURED_REPOS.map((repo) => ({
+            ...repo,
+            stars: 0,
+            href: repoUrl(repo, USERNAME),
+            fullName: repoFullName(repo, USERNAME),
+          })),
+        );
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -134,7 +248,7 @@ export function GitHubActivity() {
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-accent">Actividad en GitHub</p>
           <h3 className="mt-2 text-2xl font-semibold tracking-tight">@{USERNAME}</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Commits, contribuciones y repos públicos en tiempo real.
+            Contribuciones, repos destacados y commits recientes.
           </p>
         </div>
         <a
@@ -148,66 +262,72 @@ export function GitHubActivity() {
       </div>
 
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-[1fr_280px]">
+        <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
           <div className="h-32 animate-pulse rounded-xl bg-surface-2" />
           <div className="h-32 animate-pulse rounded-xl bg-surface-2" />
         </div>
       ) : (
-        <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
-          <div>
-            <Heatmap days={contributions} />
+        <>
+          <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+            <div>
+              <Heatmap days={contributions} />
 
-            <div className="mt-8 grid grid-cols-3 gap-3">
-              {[
-                { label: "Contribuciones", value: yearTotal || "—" },
-                { label: "Repos públicos", value: user?.public_repos ?? "—" },
-                { label: "Seguidores", value: user?.followers ?? "—" },
-              ].map((stat) => (
-                <div key={stat.label} className="rounded-xl border border-border bg-background/50 px-4 py-3">
-                  <div className="text-lg font-semibold tabular-nums">{stat.value}</div>
-                  <div className="text-xs text-muted-foreground">{stat.label}</div>
-                </div>
-              ))}
+              <div className="mt-8 grid grid-cols-3 gap-3">
+                {[
+                  { label: "Contribuciones", value: yearTotal || "—" },
+                  { label: "Repos públicos", value: user?.public_repos ?? "—" },
+                  { label: "Seguidores", value: user?.followers ?? "—" },
+                ].map((stat) => (
+                  <div key={stat.label} className="rounded-xl border border-border bg-background/50 px-4 py-3">
+                    <div className="text-lg font-semibold tabular-nums">{stat.value}</div>
+                    <div className="text-xs text-muted-foreground">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <GitCommit className="h-3.5 w-3.5" /> Commits recientes
+              </p>
+              <ul className="space-y-2">
+                {events.length === 0 ? (
+                  <li className="rounded-lg border border-border bg-background/40 px-3 py-4 text-sm text-muted-foreground">
+                    No hay pushes recientes visibles.
+                  </li>
+                ) : (
+                  events.map((ev) => {
+                    const msg = ev.payload.commits?.[0]?.message ?? "Push al repositorio";
+                    return (
+                      <li key={ev.id}>
+                        <a
+                          href={`https://github.com/${ev.repo.name}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group block rounded-lg border border-border bg-background/40 px-3 py-2.5 transition-colors hover:border-accent/30 hover:bg-background/70"
+                        >
+                          <p className="line-clamp-2 text-sm leading-snug text-foreground/90 group-hover:text-foreground">
+                            {msg}
+                          </p>
+                          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Github className="h-3 w-3" />
+                            {ev.repo.name.split("/")[1]}
+                            <span>·</span>
+                            {formatRelative(ev.created_at)}
+                          </p>
+                        </a>
+                      </li>
+                    );
+                  })
+                )}
+              </ul>
             </div>
           </div>
 
-          <div>
-            <p className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              <GitCommit className="h-3.5 w-3.5" /> Commits recientes
-            </p>
-            <ul className="space-y-2">
-              {events.length === 0 ? (
-                <li className="rounded-lg border border-border bg-background/40 px-3 py-4 text-sm text-muted-foreground">
-                  No hay pushes recientes visibles.
-                </li>
-              ) : (
-                events.map((ev) => {
-                  const msg = ev.payload.commits?.[0]?.message ?? "Push al repositorio";
-                  return (
-                    <li key={ev.id}>
-                      <a
-                        href={`https://github.com/${ev.repo.name}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group block rounded-lg border border-border bg-background/40 px-3 py-2.5 transition-colors hover:border-accent/30 hover:bg-background/70"
-                      >
-                        <p className="line-clamp-2 text-sm leading-snug text-foreground/90 group-hover:text-foreground">
-                          {msg}
-                        </p>
-                        <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Github className="h-3 w-3" />
-                          {ev.repo.name.split("/")[1]}
-                          <span>·</span>
-                          {formatRelative(ev.created_at)}
-                        </p>
-                      </a>
-                    </li>
-                  );
-                })
-              )}
-            </ul>
+          <div className="mt-8 border-t border-border pt-8">
+            <FeaturedRepoGrid repos={featuredRepos} />
           </div>
-        </div>
+        </>
       )}
     </div>
   );
