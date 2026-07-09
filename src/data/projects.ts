@@ -92,7 +92,7 @@ export const projects: Project[] = [
     title: "Pinsa",
     role: "Full Stack · Freelance",
     year: "2025",
-    url: "https://pinsa.vercel.app/",
+    url: "https://pinsa.cl",
     image: pinsaImg,
     summary: "Landing B2B industrial — presencia digital, credibilidad y captación de leads.",
     description:
