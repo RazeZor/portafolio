@@ -99,9 +99,19 @@ export function ContactForm() {
           message: buildContactMessage({ company, phone, projectType, budget, deadline, message }),
           subject: `Nuevo contacto — ${name}${company ? ` (${company})` : ""}`,
           from_name: SITE.brand,
+          botcheck: false,
         }),
       });
-      if (!res.ok) throw new Error("Error al enviar");
+
+      const result = (await res.json()) as {
+        success?: boolean;
+        message?: string;
+        body?: { message?: string };
+      };
+      if (!res.ok || result.success === false) {
+        throw new Error(result.message ?? result.body?.message ?? "Error al enviar");
+      }
+
       setContactCooldown();
       setCooldownRemaining(getContactCooldownRemaining());
       setStatus("success");
@@ -139,8 +149,8 @@ export function ContactForm() {
         </p>
         <p className="mt-3 text-sm text-muted-foreground">
           Si es urgente, escríbeme a{" "}
-          <a href={`mailto:${SITE.email}`} className="text-accent hover:underline">
-            {SITE.email}
+          <a href={`mailto:${SITE.inboxEmail}`} className="text-accent hover:underline">
+            {SITE.inboxEmail}
           </a>
         </p>
       </div>
@@ -149,6 +159,7 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-border bg-background/60 p-6 backdrop-blur">
+      <input type="checkbox" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" />
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="contact-name" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -275,7 +286,13 @@ export function ContactForm() {
         />
       </div>
       {status === "error" && (
-        <p className="text-sm text-destructive">No se pudo enviar. Escríbeme a {SITE.email}</p>
+        <p className="text-sm text-destructive">
+          No se pudo enviar.{WEB3FORMS_KEY ? "" : " Falta configurar el formulario en producción."}{" "}
+          Escríbeme a{" "}
+          <a href={`mailto:${SITE.inboxEmail}`} className="underline">
+            {SITE.inboxEmail}
+          </a>
+        </p>
       )}
       <button
         type="submit"

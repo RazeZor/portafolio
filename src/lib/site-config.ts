@@ -6,6 +6,7 @@ export const SITE = {
   description:
     "Estudiante de Ingeniería en Informática en la USM. Fundador de Kenkomed. Productos web y sistemas con impacto real en Concepción.",
   email: "contacto@nachodevsc.dev",
+  inboxEmail: "nachodevsc@gmail.com",
   location: "Concepción, CL",
   graduation: "2027",
   linkedin: "https://www.linkedin.com/in/ignacio-castillo-jaramillo-831811295/",
