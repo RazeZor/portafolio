@@ -9,6 +9,45 @@ import {
 
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY as string | undefined;
 
+const INPUT_CLASS =
+  "w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm outline-none transition-colors focus:border-accent/50 focus:ring-1 focus:ring-accent/30";
+
+const PROJECT_TYPES = [
+  "Sitio web / landing",
+  "E-commerce / catálogo",
+  "Sistema o plataforma",
+  "Mantenimiento / mejora",
+  "Consultoría técnica",
+  "Otro",
+] as const;
+
+const BUDGET_RANGES = [
+  "Aún no lo tengo definido",
+  "Menos de $300.000 CLP",
+  "$300.000 – $800.000 CLP",
+  "$800.000 – $2.000.000 CLP",
+  "Más de $2.000.000 CLP",
+] as const;
+
+function buildContactMessage(fields: {
+  company: string;
+  phone: string;
+  projectType: string;
+  budget: string;
+  deadline: string;
+  message: string;
+}) {
+  const details = [
+    fields.company && `Empresa / proyecto: ${fields.company}`,
+    fields.phone && `Teléfono / WhatsApp: ${fields.phone}`,
+    fields.projectType && `Tipo de proyecto: ${fields.projectType}`,
+    fields.budget && `Presupuesto estimado: ${fields.budget}`,
+    fields.deadline && `Plazo: ${fields.deadline}`,
+  ].filter(Boolean);
+
+  return details.length > 0 ? `${details.join("\n")}\n\n${fields.message}` : fields.message;
+}
+
 export function ContactForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [cooldownRemaining, setCooldownRemaining] = useState(getContactCooldownRemaining);
@@ -30,17 +69,16 @@ export function ContactForm() {
     const form = e.currentTarget;
     const data = new FormData(form);
     const name = String(data.get("name") ?? "");
+    const email = String(data.get("email") ?? "");
+    const company = String(data.get("company") ?? "");
+    const phone = String(data.get("phone") ?? "");
+    const projectType = String(data.get("projectType") ?? "");
+    const budget = String(data.get("budget") ?? "");
     const message = String(data.get("message") ?? "");
     const deadline = String(data.get("deadline") ?? "");
 
     if (!WEB3FORMS_KEY) {
-      const subject = encodeURIComponent(`Consulta de ${name} — portafolio`);
-      const body = encodeURIComponent(
-        `Nombre: ${name}\nPlazo: ${deadline}\n\n${message}`,
-      );
-      setContactCooldown();
-      setCooldownRemaining(getContactCooldownRemaining());
-      window.location.href = `mailto:${SITE.email}?subject=${subject}&body=${body}`;
+      setStatus("error");
       return;
     }
 
@@ -52,8 +90,14 @@ export function ContactForm() {
         body: JSON.stringify({
           access_key: WEB3FORMS_KEY,
           name,
-          message: `Plazo: ${deadline}\n\n${message}`,
-          subject: `Nuevo contacto — ${name}`,
+          email,
+          phone,
+          company,
+          project_type: projectType,
+          budget,
+          deadline,
+          message: buildContactMessage({ company, phone, projectType, budget, deadline, message }),
+          subject: `Nuevo contacto — ${name}${company ? ` (${company})` : ""}`,
           from_name: SITE.brand,
         }),
       });
@@ -105,18 +149,106 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-border bg-background/60 p-6 backdrop-blur">
-      <div>
-        <label htmlFor="contact-name" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Nombre
-        </label>
-        <input
-          id="contact-name"
-          name="name"
-          required
-          className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm outline-none transition-colors focus:border-accent/50 focus:ring-1 focus:ring-accent/30"
-          placeholder="Tu nombre"
-        />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="contact-name" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Nombre
+          </label>
+          <input
+            id="contact-name"
+            name="name"
+            required
+            autoComplete="name"
+            className={INPUT_CLASS}
+            placeholder="Tu nombre"
+          />
+        </div>
+        <div>
+          <label htmlFor="contact-email" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Email
+          </label>
+          <input
+            id="contact-email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            className={INPUT_CLASS}
+            placeholder="tu@email.com"
+          />
+        </div>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="contact-company" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Empresa o proyecto
+          </label>
+          <input
+            id="contact-company"
+            name="company"
+            autoComplete="organization"
+            className={INPUT_CLASS}
+            placeholder="Ej. Mi pyme, startup, marca personal..."
+          />
+        </div>
+        <div>
+          <label htmlFor="contact-phone" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Teléfono / WhatsApp
+          </label>
+          <input
+            id="contact-phone"
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            className={INPUT_CLASS}
+            placeholder="+56 9 ..."
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="contact-project-type" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Tipo de proyecto
+          </label>
+          <select
+            id="contact-project-type"
+            name="projectType"
+            required
+            defaultValue=""
+            className={INPUT_CLASS}
+          >
+            <option value="" disabled>
+              Selecciona una opción
+            </option>
+            {PROJECT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="contact-budget" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Presupuesto estimado
+          </label>
+          <select
+            id="contact-budget"
+            name="budget"
+            defaultValue=""
+            className={INPUT_CLASS}
+          >
+            <option value="">Prefiero no indicarlo</option>
+            {BUDGET_RANGES.map((range) => (
+              <option key={range} value={range}>
+                {range}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div>
         <label htmlFor="contact-deadline" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Plazo aproximado
@@ -124,10 +256,11 @@ export function ContactForm() {
         <input
           id="contact-deadline"
           name="deadline"
-          className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm outline-none transition-colors focus:border-accent/50 focus:ring-1 focus:ring-accent/30"
+          className={INPUT_CLASS}
           placeholder="Ej. 2 semanas, sin apuro..."
         />
       </div>
+
       <div>
         <label htmlFor="contact-message" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
           ¿Qué necesitas?
@@ -137,8 +270,8 @@ export function ContactForm() {
           name="message"
           required
           rows={4}
-          className="w-full resize-none rounded-lg border border-border bg-surface px-3 py-2.5 text-sm outline-none transition-colors focus:border-accent/50 focus:ring-1 focus:ring-accent/30"
-          placeholder="Cuéntame el contexto: qué pasa hoy y qué quieres lograr."
+          className={`${INPUT_CLASS} resize-none`}
+          placeholder="Cuéntame el contexto: qué pasa hoy, qué quieres lograr y qué ya has intentado."
         />
       </div>
       {status === "error" && (
@@ -156,11 +289,6 @@ export function ContactForm() {
           <><Send className="h-4 w-4" /> Enviar mensaje</>
         )}
       </button>
-      {!WEB3FORMS_KEY && (
-        <p className="text-center text-[11px] text-muted-foreground">
-          Se abrirá tu cliente de correo. Para envío directo, configura VITE_WEB3FORMS_ACCESS_KEY.
-        </p>
-      )}
     </form>
   );
 }
