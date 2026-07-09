@@ -1,14 +1,32 @@
-import { useState, type FormEvent } from "react";
-import { CheckCircle2, Loader2, Send } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import { CheckCircle2, Clock, Loader2, Send } from "lucide-react";
 import { SITE } from "@/lib/site-config";
+import {
+  formatCooldownRemaining,
+  getContactCooldownRemaining,
+  setContactCooldown,
+} from "@/lib/contact-rate-limit";
 
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY as string | undefined;
 
 export function ContactForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [cooldownRemaining, setCooldownRemaining] = useState(getContactCooldownRemaining);
+
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return;
+    const interval = window.setInterval(() => {
+      setCooldownRemaining(getContactCooldownRemaining());
+    }, 60_000);
+    return () => window.clearInterval(interval);
+  }, [cooldownRemaining]);
+
+  const isRateLimited = cooldownRemaining > 0;
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (isRateLimited) return;
+
     const form = e.currentTarget;
     const data = new FormData(form);
     const name = String(data.get("name") ?? "");
@@ -20,6 +38,8 @@ export function ContactForm() {
       const body = encodeURIComponent(
         `Nombre: ${name}\nPlazo: ${deadline}\n\n${message}`,
       );
+      setContactCooldown();
+      setCooldownRemaining(getContactCooldownRemaining());
       window.location.href = `mailto:${SITE.email}?subject=${subject}&body=${body}`;
       return;
     }
@@ -38,6 +58,8 @@ export function ContactForm() {
         }),
       });
       if (!res.ok) throw new Error("Error al enviar");
+      setContactCooldown();
+      setCooldownRemaining(getContactCooldownRemaining());
       setStatus("success");
       form.reset();
     } catch {
@@ -51,12 +73,32 @@ export function ContactForm() {
         <CheckCircle2 className="h-10 w-10 text-accent" />
         <p className="mt-3 font-medium">Mensaje enviado</p>
         <p className="mt-1 text-sm text-muted-foreground">Te respondo en menos de 24 h.</p>
-        <button
-          onClick={() => setStatus("idle")}
-          className="mt-4 text-sm text-accent hover:underline"
-        >
-          Enviar otro mensaje
-        </button>
+        {!isRateLimited && (
+          <button
+            onClick={() => setStatus("idle")}
+            className="mt-4 text-sm text-accent hover:underline"
+          >
+            Enviar otro mensaje
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (isRateLimited) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-background/60 p-8 text-center backdrop-blur">
+        <Clock className="h-10 w-10 text-muted-foreground" />
+        <p className="mt-3 font-medium">Ya enviaste un mensaje recientemente</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Podrás enviar otro en {formatCooldownRemaining(cooldownRemaining)}.
+        </p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Si es urgente, escríbeme a{" "}
+          <a href={`mailto:${SITE.email}`} className="text-accent hover:underline">
+            {SITE.email}
+          </a>
+        </p>
       </div>
     );
   }
