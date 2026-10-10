@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, GitCommit, Github, Star } from "lucide-react";
+import ContributionSkyline from "@/components/ui/contribution-skyline";
 import {
   EXCLUDED_REPO_NAMES,
   FEATURED_REPOS,
@@ -270,7 +271,14 @@ export function GitHubActivity() {
         <>
           <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
             <div>
-              <Heatmap days={contributions} />
+              <ContributionSkyline
+                data={contributions}
+                locale="es-CL"
+                palette="github"
+                unit="contribución"
+                unitPlural="contribuciones"
+                showStats={false}
+              />
 
               <div className="mt-8 grid grid-cols-3 gap-3">
                 {[

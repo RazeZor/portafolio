@@ -15,6 +15,8 @@ import { Logo } from "@/components/logo";
 import { HeroAvatar } from "@/components/hero-avatar";
 import { ProjectCard } from "@/components/project-card";
 import { TrustStrip } from "@/components/trust-strip";
+import OrbitingSkills from "@/components/ui/orbiting-skills";
+import ContactWithGlobe from "@/components/ui/contact-with-globe";
 import { featuredProject, projects } from "@/data/projects";
 import { SITE } from "@/lib/site-config";
 import { usePageMeta } from "@/lib/use-page-meta";
@@ -276,6 +278,9 @@ function HomePage() {
 
       {/* STACK */}
       <Section id="stack" eyebrow="Herramientas" title="Con qué ejecuto." subtitle="El stack cambia según el problema — esto es lo que uso hoy para materializar soluciones.">
+        <div className="reveal mb-8 overflow-hidden rounded-2xl border border-border bg-surface p-4 sm:p-6 md:p-8 backdrop-blur-sm" style={{ boxShadow: "var(--shadow-soft)" }}>
+          <OrbitingSkills />
+        </div>
         <div className="grid gap-5 md:grid-cols-2">
           {skillGroups.map((g, i) => (
             <div
@@ -379,49 +384,9 @@ function HomePage() {
       </Section>
 
       {/* CONTACTO */}
-      <Section id="contacto" eyebrow="Contacto" title="¿Tienes un problema que resolver?" subtitle="Cuéntame el contexto: qué pasa hoy, qué necesitas lograr y en qué plazo. Respondo en menos de 24 h.">
-        <div className="reveal relative overflow-hidden rounded-3xl border border-border bg-surface p-8 md:p-12" style={{ boxShadow: "var(--shadow-card)" }}>
-          <div className="absolute -top-32 -right-32 h-64 w-64 rounded-full opacity-30 blur-3xl" style={{ background: "var(--gradient-accent)" }} />
-
-          <div className="relative grid items-start gap-10 lg:grid-cols-[1fr_1fr]">
-            <div>
-              <p className="text-muted-foreground">
-                Busco colaboraciones donde pueda aportar desde el análisis hasta
-                la entrega: pymes, emprendimientos, equipos técnicos o proyectos
-                académicos con impacto real.
-              </p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                <a href={`mailto:${SITE.email}`} className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white transition-all hover:scale-[1.03]" style={{ background: "var(--gradient-accent)" }}>
-                  <Mail className="h-4 w-4" /> {SITE.email}
-                </a>
-                <a href={SITE.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-secondary">
-                  <Linkedin className="h-4 w-4" /> LinkedIn
-                </a>
-                <a href={SITE.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-secondary">
-                  <Github className="h-4 w-4" /> GitHub
-                </a>
-                <a href={SITE.cvPath} download className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-secondary">
-                  <Download className="h-4 w-4" /> CV
-                </a>
-              </div>
-              <div className="mt-8 grid grid-cols-2 gap-3">
-                {[
-                  { k: "Ubicación", v: SITE.location },
-                  { k: "Modalidad", v: "Remoto · Híbrido · Freelance" },
-                  { k: "Enfoque", v: "Problema → solución" },
-                  { k: "Formación", v: `Ing. Informática · USM ${SITE.graduation}` },
-                ].map((b) => (
-                  <div key={b.k} className="rounded-xl border border-border bg-background/60 p-4 backdrop-blur">
-                    <div className="text-xs uppercase tracking-wider text-muted-foreground">{b.k}</div>
-                    <div className="mt-1.5 text-sm font-medium">{b.v}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <ContactForm />
-          </div>
-        </div>
-      </Section>
+      <section id="contacto" className="scroll-mt-20 mx-auto max-w-6xl px-5 pb-20 md:pb-28">
+        <ContactWithGlobe />
+      </section>
 
       <footer className="border-t border-border py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 text-sm text-muted-foreground md:flex-row">
