@@ -158,11 +158,24 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-border bg-background/60 p-6 backdrop-blur">
-      <input type="checkbox" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 rounded-2xl border border-border bg-background/60 p-6 backdrop-blur"
+    >
+      <input
+        type="checkbox"
+        name="botcheck"
+        className="hidden"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+      />
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="contact-name" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <label
+            htmlFor="contact-name"
+            className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground"
+          >
             Nombre
           </label>
           <input
@@ -175,7 +188,10 @@ export function ContactForm() {
           />
         </div>
         <div>
-          <label htmlFor="contact-email" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <label
+            htmlFor="contact-email"
+            className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground"
+          >
             Email
           </label>
           <input
@@ -192,7 +208,10 @@ export function ContactForm() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="contact-company" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <label
+            htmlFor="contact-company"
+            className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground"
+          >
             Empresa o proyecto
           </label>
           <input
@@ -204,7 +223,10 @@ export function ContactForm() {
           />
         </div>
         <div>
-          <label htmlFor="contact-phone" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <label
+            htmlFor="contact-phone"
+            className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground"
+          >
             Teléfono / WhatsApp
           </label>
           <input
@@ -220,7 +242,10 @@ export function ContactForm() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="contact-project-type" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <label
+            htmlFor="contact-project-type"
+            className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground"
+          >
             Tipo de proyecto
           </label>
           <select
@@ -241,15 +266,13 @@ export function ContactForm() {
           </select>
         </div>
         <div>
-          <label htmlFor="contact-budget" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <label
+            htmlFor="contact-budget"
+            className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground"
+          >
             Presupuesto estimado
           </label>
-          <select
-            id="contact-budget"
-            name="budget"
-            defaultValue=""
-            className={INPUT_CLASS}
-          >
+          <select id="contact-budget" name="budget" defaultValue="" className={INPUT_CLASS}>
             <option value="">Prefiero no indicarlo</option>
             {BUDGET_RANGES.map((range) => (
               <option key={range} value={range}>
@@ -261,7 +284,10 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="contact-deadline" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <label
+          htmlFor="contact-deadline"
+          className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground"
+        >
           Plazo aproximado
         </label>
         <input
@@ -273,7 +299,10 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="contact-message" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <label
+          htmlFor="contact-message"
+          className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground"
+        >
           ¿Qué necesitas?
         </label>
         <textarea
@@ -301,9 +330,13 @@ export function ContactForm() {
         style={{ background: "var(--gradient-accent)" }}
       >
         {status === "loading" ? (
-          <><Loader2 className="h-4 w-4 animate-spin" /> Enviando...</>
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" /> Enviando...
+          </>
         ) : (
-          <><Send className="h-4 w-4" /> Enviar mensaje</>
+          <>
+            <Send className="h-4 w-4" /> Enviar mensaje
+          </>
         )}
       </button>
     </form>

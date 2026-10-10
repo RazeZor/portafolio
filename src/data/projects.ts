@@ -39,7 +39,8 @@ export const projects: Project[] = [
     url: "https://kenkomed.cl",
     github: "https://github.com/RazeZor/Sistema-kenkomed-django",
     image: kenkomedImg,
-    summary: "DSS clínico para kinesiólogos: pacientes, tratamientos, métricas y sitio institucional.",
+    summary:
+      "DSS clínico para kinesiólogos: pacientes, tratamientos, métricas y sitio institucional.",
     description:
       "Kenkomed es la startup que fundé para digitalizar la práctica kinesiológica en Chile. Lideré el producto de punta a punta: arquitectura backend, base de datos clínica, panel de profesionales y sitio institucional. Hoy está en uso con módulos de admisión QR, escalas validadas (EVA, PSFS, Barthel) y un motor DSS que apoya decisiones clínicas con datos reales del paciente.",
     problem:
@@ -203,7 +204,8 @@ export const projects: Project[] = [
     url: "https://github.com/juako950/nerdearla_ollama",
     github: "https://github.com/juako950/nerdearla_ollama",
     image: nerdearlaImg,
-    summary: "LLM local en menos de 6 h: chat offline, agente con tools y pipeline de fine-tuning en Kaggle.",
+    summary:
+      "LLM local en menos de 6 h: chat offline, agente con tools y pipeline de fine-tuning en Kaggle.",
     description:
       "Proyecto del concurso Nerdearla Santiago 2026. En menos de seis horas, junto a un compañero, construimos un asistente conversacional que corre 100% en local con Ollama y qwen2.5:3b. Usamos Strands Agents para orquestar el agente, FastAPI como backend async y Next.js como interfaz de chat. Fue nuestra primera experiencia práctica con fine-tuning: curamos ejemplos en JSONL desde el propio chat y los preparamos para entrenar en Kaggle sobre un modelo de la familia open-weight (Qwen/PAI).",
     problem:

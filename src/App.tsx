@@ -3,6 +3,7 @@ import { PersonSchema } from "@/components/person-schema";
 import HomePage from "@/pages/HomePage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import ProjectPage from "@/pages/ProjectPage";
+import DemoOne from "@/pages/demo";
 
 export default function App() {
   return (
@@ -10,6 +11,7 @@ export default function App() {
       <PersonSchema />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/demo" element={<DemoOne />} />
         <Route path="/proyecto/:slug" element={<ProjectPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

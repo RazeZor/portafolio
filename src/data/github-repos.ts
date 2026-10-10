@@ -50,9 +50,7 @@ export const FEATURED_REPOS: FeaturedRepo[] = [
   },
 ];
 
-export const EXCLUDED_REPO_NAMES = new Set([
-  "Sistema-kenkomed-django",
-]);
+export const EXCLUDED_REPO_NAMES = new Set(["Sistema-kenkomed-django"]);
 
 export function repoFullName(repo: FeaturedRepo, defaultOwner = "RazeZor") {
   const owner = repo.owner ?? defaultOwner;

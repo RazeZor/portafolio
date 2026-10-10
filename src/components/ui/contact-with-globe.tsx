@@ -9,11 +9,7 @@ import { Button } from "@/components/ui/button";
 import * as SeparatorPrimitive from "@radix-ui/react-separator";
 import * as d3 from "d3";
 import { feature } from "topojson-client";
-import type {
-  Topology,
-  GeometryCollection,
-  GeometryObject,
-} from "topojson-specification";
+import type { Topology, GeometryCollection, GeometryObject } from "topojson-specification";
 import type { GeoPermissibleObjects } from "d3";
 
 const smoothEase = [0.25, 0.1, 0.25, 1] as const;
@@ -118,23 +114,17 @@ function interpolateProjection(
     };
   };
 
-  const projection = d3.geoProjection(
-    createRawProjection(t),
-  ) as unknown as CustomProjection;
+  const projection = d3.geoProjection(createRawProjection(t)) as unknown as CustomProjection;
 
   const alphaMethod = ((value?: number): CustomProjection | number => {
     if (value !== undefined) {
       t = +value;
-      const newProjection = d3.geoProjection(
-        createRawProjection(t),
-      ) as unknown as CustomProjection;
+      const newProjection = d3.geoProjection(createRawProjection(t)) as unknown as CustomProjection;
 
       if (projection.scale()) newProjection.scale(projection.scale()!);
-      if (projection.translate())
-        newProjection.translate(projection.translate()!);
+      if (projection.translate()) newProjection.translate(projection.translate()!);
       if (projection.rotate()) newProjection.rotate(projection.rotate()!);
-      if (projection.precision())
-        newProjection.precision(projection.precision()!);
+      if (projection.precision()) newProjection.precision(projection.precision()!);
 
       newProjection.alpha = alphaMethod as CustomProjection["alpha"];
 
@@ -251,8 +241,7 @@ function GlobeWireframe({
           "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",
         );
         const world = (await response.json()) as WorldAtlasTopology;
-        const countries = feature(world, world.objects.countries)
-          .features as GeoFeature[];
+        const countries = feature(world, world.objects.countries).features as GeoFeature[];
         setWorldData(countries);
       } catch (error) {
         console.error("Error loading world data:", error);
@@ -303,41 +292,36 @@ function GlobeWireframe({
     };
   }, [autoRotate, autoRotateSpeed, isVisible, isDragging, rotateCities.length]);
 
-  const animateRotationTo = useCallback(
-    (target: [number, number], duration = 1200) => {
-      if (rotationAnimFrame.current) {
-        cancelAnimationFrame(rotationAnimFrame.current);
+  const animateRotationTo = useCallback((target: [number, number], duration = 1200) => {
+    if (rotationAnimFrame.current) {
+      cancelAnimationFrame(rotationAnimFrame.current);
+    }
+
+    rotationFrom.current = rotationRef.current;
+    rotationTo.current = target;
+    rotationStartTime.current = performance.now();
+
+    const animate = (time: number) => {
+      const elapsed = time - (rotationStartTime.current || 0);
+      const t = Math.min(elapsed / duration, 1);
+
+      const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+      const lon =
+        rotationFrom.current[0] + (rotationTo.current[0] - rotationFrom.current[0]) * eased;
+
+      const lat =
+        rotationFrom.current[1] + (rotationTo.current[1] - rotationFrom.current[1]) * eased;
+
+      setRotation([lon, lat]);
+
+      if (t < 1) {
+        rotationAnimFrame.current = requestAnimationFrame(animate);
       }
+    };
 
-      rotationFrom.current = rotationRef.current;
-      rotationTo.current = target;
-      rotationStartTime.current = performance.now();
-
-      const animate = (time: number) => {
-        const elapsed = time - (rotationStartTime.current || 0);
-        const t = Math.min(elapsed / duration, 1);
-
-        const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-
-        const lon =
-          rotationFrom.current[0] +
-          (rotationTo.current[0] - rotationFrom.current[0]) * eased;
-
-        const lat =
-          rotationFrom.current[1] +
-          (rotationTo.current[1] - rotationFrom.current[1]) * eased;
-
-        setRotation([lon, lat]);
-
-        if (t < 1) {
-          rotationAnimFrame.current = requestAnimationFrame(animate);
-        }
-      };
-
-      rotationAnimFrame.current = requestAnimationFrame(animate);
-    },
-    [],
-  );
+    rotationAnimFrame.current = requestAnimationFrame(animate);
+  }, []);
 
   useEffect(() => {
     if (rotateCities.length === 0 || !isVisible) return;
@@ -348,10 +332,7 @@ function GlobeWireframe({
       const coordinates = cityCoordinates[city];
 
       if (coordinates) {
-        animateRotationTo(
-          [-coordinates[1], -coordinates[0]],
-          rotationSpeed * 0.6,
-        );
+        animateRotationTo([-coordinates[1], -coordinates[0]], rotationSpeed * 0.6);
         setCurrentCityIndex(nextIndex);
       }
     };
@@ -360,10 +341,7 @@ function GlobeWireframe({
     const coordinates = cityCoordinates[city];
 
     if (coordinates) {
-      animateRotationTo(
-        [-coordinates[1], -coordinates[0]],
-        rotationSpeed * 0.6,
-      );
+      animateRotationTo([-coordinates[1], -coordinates[0]], rotationSpeed * 0.6);
     }
 
     rotationInterval.current = setInterval(rotateToNextCity, rotationSpeed);
@@ -371,13 +349,7 @@ function GlobeWireframe({
     return () => {
       if (rotationInterval.current) clearInterval(rotationInterval.current);
     };
-  }, [
-    rotateCities,
-    currentCityIndex,
-    rotationSpeed,
-    isVisible,
-    animateRotationTo,
-  ]);
+  }, [rotateCities, currentCityIndex, rotationSpeed, isVisible, animateRotationTo]);
 
   useEffect(() => {
     if (!rotateToLocation) return;
@@ -562,9 +534,7 @@ function GlobeWireframe({
       .attr("opacity", finalOpacity)
       .style("visibility", function (this: SVGPathElement) {
         const pathData = d3.select(this).attr("d");
-        return pathData && pathData.length > 0 && !pathData.includes("NaN")
-          ? "visible"
-          : "hidden";
+        return pathData && pathData.length > 0 && !pathData.includes("NaN") ? "visible" : "hidden";
       })
       .on("mouseenter", function (this: SVGPathElement) {
         if (countryHoverColor && variant === "solid") {
@@ -625,17 +595,9 @@ function GlobeWireframe({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
-        className={
-          useResponsive
-            ? "w-full h-full opacity-0 transition-opacity duration-1000"
-            : ""
-        }
+        className={useResponsive ? "w-full h-full opacity-0 transition-opacity duration-1000" : ""}
         style={{
-          cursor: enableInteraction
-            ? isDragging
-              ? "grabbing"
-              : "grab"
-            : "default",
+          cursor: enableInteraction ? (isDragging ? "grabbing" : "grab") : "default",
           opacity: useResponsive ? (dimensions.width > 0 ? 1 : 0) : 1,
         }}
       />
@@ -646,46 +608,35 @@ function GlobeWireframe({
 const FormDots = React.forwardRef<
   React.ComponentRef<typeof SeparatorPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
->(
-  (
-    { className, orientation = "horizontal", decorative = true, ...props },
-    ref,
-  ) => {
-    const isHorizontal = orientation === "horizontal";
-    return (
-      <SeparatorPrimitive.Root
-        ref={ref}
-        decorative={decorative}
-        orientation={orientation}
-        className={cn(
-          "shrink-0 flex items-center justify-center overflow-hidden",
-          isHorizontal ? "w-full" : "h-full",
-          className,
-        )}
-        {...props}
-      >
+>(({ className, orientation = "horizontal", decorative = true, ...props }, ref) => {
+  const isHorizontal = orientation === "horizontal";
+  return (
+    <SeparatorPrimitive.Root
+      ref={ref}
+      decorative={decorative}
+      orientation={orientation}
+      className={cn(
+        "shrink-0 flex items-center justify-center overflow-hidden",
+        isHorizontal ? "w-full" : "h-full",
+        className,
+      )}
+      {...props}
+    >
+      <div className={cn("relative", isHorizontal ? "w-full h-4" : "h-full w-4")}>
         <div
-          className={cn("relative", isHorizontal ? "w-full h-4" : "h-full w-4")}
-        >
-          <div
-            className={cn(
-              "absolute inset-0 bg-repeat",
-              "text-neutral-400 dark:text-white/20",
-            )}
-            style={{
-              backgroundImage:
-                "radial-gradient(circle, currentColor 0.8px, transparent 0.8px)",
-              backgroundSize: isHorizontal ? "6px 100%" : "100% 6px",
-              maskImage: isHorizontal
-                ? "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)"
-                : "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)",
-            }}
-          />
-        </div>
-      </SeparatorPrimitive.Root>
-    );
-  },
-);
+          className={cn("absolute inset-0 bg-repeat", "text-neutral-400 dark:text-white/20")}
+          style={{
+            backgroundImage: "radial-gradient(circle, currentColor 0.8px, transparent 0.8px)",
+            backgroundSize: isHorizontal ? "6px 100%" : "100% 6px",
+            maskImage: isHorizontal
+              ? "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)"
+              : "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)",
+          }}
+        />
+      </div>
+    </SeparatorPrimitive.Root>
+  );
+});
 FormDots.displayName = "FormDots";
 
 interface ContactWithGlobeProps {
@@ -724,9 +675,7 @@ export default function ContactWithGlobe({
             transition={{ duration: 0.8, ease: smoothEase }}
             className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30"
           >
-            <span className="text-sm text-emerald-400 font-medium">
-              {subtitle}
-            </span>
+            <span className="text-sm text-emerald-400 font-medium">{subtitle}</span>
           </motion.div>
 
           <motion.h2
@@ -759,9 +708,7 @@ export default function ContactWithGlobe({
             className="flex flex-col gap-6"
           >
             <div className="flex flex-col gap-1">
-              <h3 className="text-xl font-semibold text-white">
-                Canales directos
-              </h3>
+              <h3 className="text-xl font-semibold text-white">Canales directos</h3>
               <p className="text-sm text-zinc-400 leading-relaxed max-w-xs">
                 Respondo habitualmente en menos de 24 horas.
               </p>
@@ -815,9 +762,7 @@ export default function ContactWithGlobe({
             className="rounded-2xl border border-zinc-800 bg-zinc-900/90 p-6 sm:p-8 flex flex-col gap-5 shadow-2xl"
           >
             <div>
-              <h3 className="text-lg font-semibold text-white mb-0.5">
-                Enviar mensaje
-              </h3>
+              <h3 className="text-lg font-semibold text-white mb-0.5">Enviar mensaje</h3>
               <p className="text-sm text-zinc-400">
                 Completa el formulario para conversar sobre tu proyecto.
               </p>
@@ -879,7 +824,10 @@ export default function ContactWithGlobe({
                   />
                 </div>
 
-                <Button type="submit" className="w-fit h-11 px-8 rounded-xl font-semibold text-sm bg-emerald-500 hover:bg-emerald-600 text-zinc-950 group gap-2 transition-all">
+                <Button
+                  type="submit"
+                  className="w-fit h-11 px-8 rounded-xl font-semibold text-sm bg-emerald-500 hover:bg-emerald-600 text-zinc-950 group gap-2 transition-all"
+                >
                   Enviar mensaje
                   <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </Button>

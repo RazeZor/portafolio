@@ -10,7 +10,12 @@ type ProjectImageProps = {
   aspect?: "card" | "hero" | "featured";
 };
 
-export function ProjectImage({ project, className, imgClassName, aspect = "card" }: ProjectImageProps) {
+export function ProjectImage({
+  project,
+  className,
+  imgClassName,
+  aspect = "card",
+}: ProjectImageProps) {
   const [failed, setFailed] = useState(false);
   const height =
     aspect === "hero"
@@ -27,7 +32,10 @@ export function ProjectImage({ project, className, imgClassName, aspect = "card"
           alt={`Vista previa de ${project.title}`}
           loading="lazy"
           decoding="async"
-          className={cn("h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]", imgClassName)}
+          className={cn(
+            "h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]",
+            imgClassName,
+          )}
           onError={() => setFailed(true)}
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />

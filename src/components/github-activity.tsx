@@ -194,9 +194,7 @@ export function GitHubActivity() {
         if (eventsRes.ok) {
           const data: GitHubEvent[] = await eventsRes.json();
           setEvents(
-            data
-              .filter((e) => e.type === "PushEvent" && !isExcludedRepo(e.repo.name))
-              .slice(0, 6),
+            data.filter((e) => e.type === "PushEvent" && !isExcludedRepo(e.repo.name)).slice(0, 6),
           );
         }
 
@@ -237,26 +235,32 @@ export function GitHubActivity() {
     }
 
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const yearTotal = contributions.reduce((s, d) => s + d.count, 0);
 
   return (
-    <div className="reveal rounded-2xl border border-border bg-surface p-6 md:p-8" style={{ boxShadow: "var(--shadow-soft)" }}>
+    <div className="reveal rounded-3xl border border-white/10 bg-white/[0.02] p-6 md:p-8 backdrop-blur-xl">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-accent">Actividad en GitHub</p>
-          <h3 className="mt-2 text-2xl font-semibold tracking-tight">@{USERNAME}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Contribuciones, repos destacados y commits recientes.
+          <p className="font-mono text-[10px] md:text-[11px] font-bold uppercase tracking-[0.25em] text-white/50">
+            ACTIVIDAD EN GITHUB
+          </p>
+          <h3 className="mt-2 text-2xl font-black uppercase tracking-tight text-white">
+            @{USERNAME}
+          </h3>
+          <p className="mt-1 font-mono text-xs text-white/50 tracking-wider">
+            Contribuciones, repos destacados y commits recientes en producción.
           </p>
         </div>
         <a
           href={`https://github.com/${USERNAME}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 self-start rounded-full border border-border bg-background px-4 py-2 text-sm transition-colors hover:border-accent/40 hover:text-accent sm:self-auto"
+          className="inline-flex items-center gap-1.5 self-start rounded-full border border-white/15 bg-white/5 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-white hover:text-black sm:self-auto"
         >
           Ver perfil <ArrowUpRight className="h-3.5 w-3.5" />
         </a>
@@ -264,8 +268,8 @@ export function GitHubActivity() {
 
       {loading ? (
         <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
-          <div className="h-32 animate-pulse rounded-xl bg-surface-2" />
-          <div className="h-32 animate-pulse rounded-xl bg-surface-2" />
+          <div className="h-32 animate-pulse rounded-2xl bg-white/5 border border-white/10" />
+          <div className="h-32 animate-pulse rounded-2xl bg-white/5 border border-white/10" />
         </div>
       ) : (
         <>
@@ -286,21 +290,26 @@ export function GitHubActivity() {
                   { label: "Repos públicos", value: user?.public_repos ?? "—" },
                   { label: "Seguidores", value: user?.followers ?? "—" },
                 ].map((stat) => (
-                  <div key={stat.label} className="rounded-xl border border-border bg-background/50 px-4 py-3">
-                    <div className="text-lg font-semibold tabular-nums">{stat.value}</div>
-                    <div className="text-xs text-muted-foreground">{stat.label}</div>
+                  <div
+                    key={stat.label}
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+                  >
+                    <div className="text-xl font-bold tabular-nums text-white">{stat.value}</div>
+                    <div className="font-mono text-[10px] tracking-wider uppercase text-white/45">
+                      {stat.label}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <p className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <p className="mb-3 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-wider text-white/50">
                 <GitCommit className="h-3.5 w-3.5" /> Commits recientes
               </p>
               <ul className="space-y-2">
                 {events.length === 0 ? (
-                  <li className="rounded-lg border border-border bg-background/40 px-3 py-4 text-sm text-muted-foreground">
+                  <li className="rounded-xl border border-white/10 bg-white/5 px-3 py-4 text-sm text-white/50">
                     No hay pushes recientes visibles.
                   </li>
                 ) : (

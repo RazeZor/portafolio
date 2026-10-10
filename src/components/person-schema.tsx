@@ -20,15 +20,7 @@ export function PersonSchema() {
       name: "Universidad Técnica Federico Santa María",
     },
     sameAs: [SITE.github, SITE.linkedin, SITE.kenkomed],
-    knowsAbout: [
-      "Python",
-      "Django",
-      "TypeScript",
-      "React",
-      "Docker",
-      "PostgreSQL",
-      "HealthTech",
-    ],
+    knowsAbout: ["Python", "Django", "TypeScript", "React", "Docker", "PostgreSQL", "HealthTech"],
   };
 
   return (
