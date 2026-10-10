@@ -26,10 +26,9 @@ import { DualAudience } from "@/components/dual-audience";
 import { FeaturedProject } from "@/components/featured-project";
 import { GitHubActivity } from "@/components/github-activity";
 import { Logo } from "@/components/logo";
-import { HeroAvatar } from "@/components/hero-avatar";
 import { ProjectCard } from "@/components/project-card";
 import { TrustStrip } from "@/components/trust-strip";
-import OrbitingSkills from "@/components/ui/orbiting-skills";
+import { StackFeatureSection } from "@/components/ui/stack-feature-section";
 import ContactWithGlobe from "@/components/ui/contact-with-globe";
 import { featuredProject, projects } from "@/data/projects";
 import { SITE } from "@/lib/site-config";
@@ -61,7 +60,6 @@ function HomePage() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("inicio");
   const [scrolled, setScrolled] = useState(false);
-  const [heroMode, setHeroMode] = useState<"3d" | "classic">("3d");
 
   usePageMeta({
     title: `${SITE.name} — ${SITE.title}`,
@@ -143,13 +141,12 @@ function HomePage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
           <button
             onClick={() => scrollTo("inicio")}
-            className="group flex items-center gap-2.5 font-semibold tracking-tight"
+            className="group flex items-center gap-3 font-semibold tracking-tight"
           >
-            <div className="relative flex h-2 w-2 items-center justify-center">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-40" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-full p-[1.5px] bg-gradient-to-tr from-purple-500 via-violet-500 to-purple-700 shadow-md shadow-purple-500/25 transition-all duration-300 group-hover:scale-105 group-hover:shadow-purple-500/50">
+              <Logo size="sm" className="h-full w-full rounded-full ring-1 ring-black/40" />
             </div>
-            <span className="font-mono text-xs font-bold tracking-[0.25em] text-white uppercase transition-colors group-hover:text-white/80">
+            <span className="font-mono text-xs font-bold tracking-[0.25em] text-white uppercase transition-colors group-hover:text-purple-300">
               NACHODEVSC
             </span>
           </button>
@@ -178,7 +175,7 @@ function HomePage() {
             </a>
             <button
               onClick={() => scrollTo("contacto")}
-              className="inline-flex items-center gap-1.5 rounded-full bg-white px-5 py-1.5 font-mono text-[11px] font-bold tracking-[0.2em] text-black uppercase shadow-md transition-all hover:scale-[1.02] hover:bg-white/90"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 via-purple-500 to-violet-600 px-5 py-1.5 font-mono text-[11px] font-bold tracking-[0.2em] text-white uppercase shadow-md shadow-purple-500/25 transition-all hover:scale-[1.02] hover:brightness-110 hover:shadow-purple-500/40"
             >
               Contacto <ArrowRight className="h-3.5 w-3.5" />
             </button>
@@ -211,188 +208,46 @@ function HomePage() {
         )}
       </header>
 
-      {/* HERO */}
+      {/* HERO 3D */}
       <section id="inicio" className="hero-section relative overflow-hidden border-b border-border">
-        {/* Toggle hero view */}
-        <div className="absolute top-4 right-4 z-40 flex items-center gap-1 rounded-full border border-border/80 bg-background/80 p-1 text-xs backdrop-blur-md shadow-lg">
-          <button
-            type="button"
-            onClick={() => setHeroMode("3d")}
-            className={`rounded-full px-3 py-1 font-mono text-[10px] uppercase transition-all ${
-              heroMode === "3d"
-                ? "bg-white text-black font-bold shadow"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Hero 3D WebGL
-          </button>
-          <button
-            type="button"
-            onClick={() => setHeroMode("classic")}
-            className={`rounded-full px-3 py-1 font-mono text-[10px] uppercase transition-all ${
-              heroMode === "classic"
-                ? "bg-white text-black font-bold shadow"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Hero Clásico
-          </button>
-        </div>
-
-        {heroMode === "3d" ? (
-          <ExperienceHero
-            badge={`${SITE.brand.toUpperCase()} · USM`}
-            titleLine1="SOFTWARE"
-            titleLine2="ENGINEER"
-            subtitle={`${SITE.name} · Ingeniería en Informática en la USM. Fundador de Kenkomed. Diseño y desarrollo sistemas escalables, productos web y experiencias interactivas con impacto real.`}
-            ctaText="Iniciar Proyecto"
-            onCtaClick={() => scrollTo("contacto")}
-            secondaryCtaText="Ver Proyectos"
-            onSecondaryCtaClick={() => scrollTo("proyectos")}
-            stats={[
-              {
-                id: "001",
-                title: "DISPONIBILIDAD",
-                val: "Disponible",
-                type: "progress",
-              },
-              {
-                id: "002",
-                title: "EN PRODUCCIÓN",
-                val: "Kenkomed",
-                type: "data",
-                sub1: { label: "Lighthouse Score", value: "95+" },
-                sub2: { label: "Sitios Desplegados", value: `${projects.length} proyectos` },
-              },
-              {
-                id: "003",
-                title: "ENFOQUE",
-                val: "Full Stack",
-                type: "text",
-                text: (
-                  <>
-                    Transformando problemas de fondo en{" "}
-                    <span className="italic text-white">
-                      sistemas escalables y productos reales
-                    </span>
-                    .
-                  </>
-                ),
-              },
-            ]}
-          />
-        ) : (
-          <div className="relative mx-auto max-w-6xl px-5 py-14 md:py-20 lg:py-24">
-            <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-              <div className="max-w-xl">
-                <div className="reveal inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
-                  </span>
-                  Disponible · Freelance selectivo
-                </div>
-
-                <h1
-                  className="reveal mt-5 text-balance text-4xl font-semibold leading-[1.08] tracking-tight md:text-5xl lg:text-[3.25rem]"
-                  data-delay="80"
-                >
-                  {SITE.name}
-                  <span className="mt-2 block text-xl font-normal text-muted-foreground md:text-2xl">
-                    {SITE.tagline}
-                  </span>
-                </h1>
-
-                <p className="reveal mt-3 text-sm text-muted-foreground" data-delay="120">
-                  Ing. Informática · USM · egreso {SITE.graduation} · {SITE.location}
-                </p>
-
-                <p
-                  className="reveal mt-5 text-base leading-relaxed text-muted-foreground md:text-[1.05rem]"
-                  data-delay="160"
-                >
-                  Ingeniero en Informática en la USM. Me interesa entender el problema de fondo,
-                  diseñar la respuesta correcta y llevarla hasta producción — no solo escribir
-                  código. Fundé{" "}
-                  <a
-                    href={SITE.kenkomed}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-accent"
-                  >
-                    Kenkomed
-                  </a>{" "}
-                  y construyo productos digitales para pymes que necesitan resultados reales.
-                </p>
-
-                <div className="reveal mt-7 flex flex-wrap gap-2.5" data-delay="240">
-                  <button
-                    onClick={() => scrollTo("proyectos")}
-                    className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110"
-                    style={{ background: "var(--gradient-accent)" }}
-                  >
-                    Ver proyectos <ArrowRight className="h-4 w-4" />
-                  </button>
-                  <a
-                    href={SITE.cvPath}
-                    download
-                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
-                  >
-                    <Download className="h-4 w-4" /> Descargar CV
-                  </a>
-                  <button
-                    onClick={() => scrollTo("contacto")}
-                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium transition-colors hover:bg-secondary"
-                  >
-                    Cotizar proyecto
-                  </button>
-                </div>
-
-                <div
-                  className="reveal mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground"
-                  data-delay="320"
-                >
-                  <span className="inline-flex items-center gap-1.5">
-                    <GraduationCap className="h-3.5 w-3.5" /> Ing. en Informática
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <Lightbulb className="h-3.5 w-3.5" /> Análisis → ejecución
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5" /> Concepción
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <Globe className="h-3.5 w-3.5" /> ES · EN
-                  </span>
-                </div>
-              </div>
-
-              <div
-                className="reveal relative mx-auto flex w-full max-w-sm items-center justify-center lg:max-w-none"
-                data-delay="200"
-              >
-                <div className="pointer-events-none absolute inset-0 m-auto h-56 w-56 rounded-full bg-[oklch(0.62_0.20_277/0.12)] blur-[80px] lg:h-72 lg:w-72" />
-                <div className="relative">
-                  <HeroAvatar />
-                  <div className="absolute -bottom-3 -left-3 rounded-xl border border-border bg-surface px-3.5 py-2.5 shadow-lg backdrop-blur md:-bottom-4 md:-left-4">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Founder
-                    </p>
-                    <p className="text-base font-semibold">Kenkomed</p>
-                  </div>
-                  <div className="absolute -bottom-3 -right-3 rounded-xl border border-border bg-surface px-3.5 py-2.5 shadow-lg backdrop-blur md:-bottom-4 md:-right-4">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      En producción
-                    </p>
-                    <p className="text-base font-semibold tabular-nums">
-                      {projects.length} proyectos
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <ExperienceHero
+          badge={`${SITE.brand.toUpperCase()} · USM`}
+          titleLine1="SOFTWARE"
+          titleLine2="ENGINEER"
+          subtitle={`${SITE.name} · Ingeniería en Informática en la USM. Fundador de Kenkomed. Diseño y desarrollo sistemas escalables, productos web y experiencias interactivas con impacto real.`}
+          ctaText="Iniciar Proyecto"
+          onCtaClick={() => scrollTo("contacto")}
+          secondaryCtaText="Ver Proyectos"
+          onSecondaryCtaClick={() => scrollTo("proyectos")}
+          stats={[
+            {
+              id: "001",
+              title: "DISPONIBILIDAD",
+              val: "Disponible",
+              type: "progress",
+            },
+            {
+              id: "002",
+              title: "EN PRODUCCIÓN",
+              val: "Kenkomed",
+              type: "data",
+              sub1: { label: "Lighthouse Score", value: "95+" },
+              sub2: { label: "Sitios Desplegados", value: `${projects.length} proyectos` },
+            },
+            {
+              id: "003",
+              title: "ENFOQUE",
+              val: "Full Stack",
+              type: "text",
+              text: (
+                <>
+                  Transformando problemas de fondo en{" "}
+                  <span className="italic text-white">sistemas escalables y productos reales</span>.
+                </>
+              ),
+            },
+          ]}
+        />
 
         <div className="hero-marquee relative z-10 py-3.5 backdrop-blur-sm">
           <div className="flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
@@ -467,8 +322,21 @@ function HomePage() {
         }
         subtitle="El stack cambia según el problema — esto es lo que uso hoy para materializar soluciones."
       >
-        <div className="reveal mb-8 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] p-4 sm:p-6 md:p-8 backdrop-blur-xl">
-          <OrbitingSkills />
+        <div className="reveal mb-8">
+          <StackFeatureSection
+            badge="ECOSISTEMA TÉCNICO"
+            title={
+              <>
+                STACK & <span className="text-outline">ARQUITECTURA</span>
+              </>
+            }
+            subtitle="Diseño, desarrollo y despliegue de sistemas escalables con tecnologías modernas: backend robusto en Python/Django, frontend reactivo en TypeScript/React y contenedores Docker."
+            primaryCtaText="Ver Proyectos"
+            onPrimaryCtaClick={() => scrollTo("proyectos")}
+            secondaryCtaText="Contactar"
+            onSecondaryCtaClick={() => scrollTo("contacto")}
+            className="my-0"
+          />
         </div>
         <div className="grid gap-5 md:grid-cols-2">
           {skillGroups.map((g, i) => (
@@ -812,8 +680,8 @@ function Section({
       className={`mx-auto max-w-6xl scroll-mt-20 px-5 py-20 md:py-28 ${className ?? ""}`}
     >
       <div className="mb-12 max-w-3xl">
-        <div className="reveal mb-3 inline-flex items-center gap-2 font-mono text-[10px] md:text-[11px] font-bold uppercase tracking-[0.25em] text-white/50">
-          <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+        <div className="reveal mb-3 inline-flex items-center gap-2 font-mono text-[10px] md:text-[11px] font-bold uppercase tracking-[0.25em] text-purple-400/90">
+          <span className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
           <span>// {eyebrow}</span>
         </div>
         <h2

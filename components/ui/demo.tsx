@@ -1,4 +1,5 @@
-import DemoOne from "../../src/components/ui/demo";
+import FeatureSection from "@/components/ui/stack-feature-section";
 
-export { DemoOne };
-export default DemoOne;
+export default function DemoOne() {
+  return <FeatureSection />;
+}

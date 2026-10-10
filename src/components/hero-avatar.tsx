@@ -7,13 +7,12 @@ type HeroAvatarProps = {
 
 export function HeroAvatar({ className }: HeroAvatarProps) {
   return (
-    <Logo
-      size="hero"
-      className={cn(
-        "ring-2 ring-border shadow-[0_24px_80px_-20px_oklch(0.62_0.20_277_/_0.45)]",
-        className,
-      )}
-      alt="Ignacio Castillo — NachoDevsc"
-    />
+    <div className="relative inline-block rounded-full p-[3px] bg-gradient-to-tr from-purple-600 via-violet-500 to-purple-800 shadow-[0_24px_80px_-20px_rgba(168,85,247,0.5)]">
+      <Logo
+        size="hero"
+        className={cn("ring-2 ring-black/60", className)}
+        alt="Ignacio Castillo — NachoDevsc"
+      />
+    </div>
   );
 }

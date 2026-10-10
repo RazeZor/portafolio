@@ -5,6 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float, MeshDistortMaterial } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
+import { logoImg } from "@/components/logo";
 
 export interface ExperienceHeroStat {
   id: string;
@@ -67,10 +68,21 @@ const LiquidBackground = () => {
         fragmentShader={`
           uniform float uTime; uniform vec2 uMouse; varying vec2 vUv;
           void main() {
-            vec2 uv = vUv; float t = uTime * 0.15;
-            vec2 m = uMouse * 0.1;
-            float color = smoothstep(0.0, 1.0, (sin(uv.x * 8.0 + t + m.x * 12.0) + sin(uv.y * 6.0 - t + m.y * 12.0)) * 0.5 + 0.5);
-            gl_FragColor = vec4(mix(vec3(0.005), vec3(0.05), color), 1.0);
+            vec2 uv = vUv; float t = uTime * 0.14;
+            vec2 m = uMouse * 0.12;
+            float wave1 = sin(uv.x * 7.0 + t + m.x * 10.0);
+            float wave2 = sin(uv.y * 5.0 - t + m.y * 10.0);
+            float pattern = smoothstep(0.0, 1.0, (wave1 + wave2) * 0.5 + 0.5);
+
+            // Base deep obsidian
+            vec3 baseDark = vec3(0.008, 0.008, 0.012);
+            // Deep neon & cosmic purple auras
+            vec3 darkPurple = vec3(0.05, 0.01, 0.12);
+            vec3 neonViolet = vec3(0.18, 0.04, 0.32);
+
+            vec3 aura = mix(darkPurple, neonViolet, uv.x * 0.85 + 0.15);
+            vec3 finalColor = mix(baseDark, aura, pattern * 0.75);
+            gl_FragColor = vec4(finalColor, 1.0);
           }
         `}
       />
@@ -90,11 +102,11 @@ const Monolith = () => {
       <mesh ref={meshRef}>
         <icosahedronGeometry args={[13, 1]} />
         <MeshDistortMaterial
-          color="#0a0a0a"
+          color="#0d0818"
           speed={4}
           distort={0.4}
-          roughness={0.05}
-          metalness={1.0}
+          roughness={0.06}
+          metalness={0.95}
         />
       </mesh>
     </Float>
@@ -205,14 +217,14 @@ export const Component: React.FC<ExperienceHeroProps> = ({
 
   const renderCtaContent = () => (
     <>
-      <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-white/15 transition-all duration-500 group-hover:bg-white">
+      <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-purple-500/30 bg-purple-500/10 shadow-[0_0_20px_rgba(168,85,247,0.15)] transition-all duration-500 group-hover:border-transparent group-hover:bg-gradient-to-tr group-hover:from-purple-600 group-hover:via-violet-500 group-hover:to-purple-400 group-hover:shadow-[0_0_35px_rgba(168,85,247,0.45)]">
         <svg
           width="18"
           height="18"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="stroke-white transition-colors duration-500 group-hover:stroke-black"
+          className="stroke-purple-400 transition-colors duration-500 group-hover:stroke-white"
         >
           <path
             d="M7 17L17 7M17 7H8M17 7V16"
@@ -222,7 +234,7 @@ export const Component: React.FC<ExperienceHeroProps> = ({
           />
         </svg>
       </div>
-      <span className="font-mono text-[11px] font-bold tracking-[0.2em] text-white uppercase">
+      <span className="font-mono text-[11px] font-bold tracking-[0.2em] text-white uppercase transition-colors duration-300 group-hover:text-purple-300">
         {ctaText}
       </span>
     </>
@@ -235,8 +247,9 @@ export const Component: React.FC<ExperienceHeroProps> = ({
     >
       <div className={`${isFixed ? "fixed" : "absolute"} inset-0 z-0 pointer-events-none`}>
         <Canvas camera={{ position: [0, 0, 60], fov: 35 }}>
-          <ambientLight intensity={0.4} />
-          <spotLight position={[50, 50, 50]} intensity={3} />
+          <ambientLight intensity={0.45} />
+          <spotLight position={[50, 50, 50]} intensity={3.5} color="#C084FC" />
+          <pointLight position={[-40, -20, 25]} intensity={2.5} color="#A855F7" />
           <LiquidBackground />
           <Monolith />
         </Canvas>
@@ -247,13 +260,22 @@ export const Component: React.FC<ExperienceHeroProps> = ({
         className="relative z-10 flex min-h-screen w-full flex-col items-center gap-10 p-8 md:flex-row md:items-stretch md:p-14 lg:p-20"
       >
         <div className="flex w-full min-w-0 flex-1 flex-col justify-between pb-12 md:pb-8">
-          <div className="flex items-center gap-3">
-            <div className="relative h-2.5 w-2.5 rounded-full bg-white">
-              <div className="absolute inset-0 animate-ping rounded-full bg-white opacity-30" />
+          <div className="flex items-center gap-3.5">
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-full p-[1.5px] bg-gradient-to-tr from-purple-500 via-violet-500 to-purple-700 shadow-lg shadow-purple-500/25">
+              <img
+                src={logoImg}
+                alt="NachoDevsc"
+                className="h-full w-full rounded-full object-cover ring-1 ring-black/50"
+              />
             </div>
-            <span className="font-mono text-[11px] font-bold tracking-[0.2em] text-white uppercase">
-              {badge}
-            </span>
+            <div className="flex items-center gap-2">
+              <div className="relative h-2 w-2 rounded-full bg-purple-500">
+                <div className="absolute inset-0 animate-ping rounded-full bg-purple-400 opacity-75" />
+              </div>
+              <span className="font-mono text-[11px] font-bold tracking-[0.2em] text-white uppercase">
+                {badge}
+              </span>
+            </div>
           </div>
 
           <div className="max-w-4xl pr-12 lg:-translate-y-8">
@@ -320,8 +342,8 @@ export const Component: React.FC<ExperienceHeroProps> = ({
                   <h4 className="text-2xl font-bold tracking-tighter text-white sm:text-3xl">
                     {item.val}
                   </h4>
-                  <div className="h-[2px] w-20 overflow-hidden rounded-full bg-white/5">
-                    <div className="animate-loading h-full w-[60%] bg-white" />
+                  <div className="h-[2px] w-20 overflow-hidden rounded-full bg-white/10">
+                    <div className="animate-loading h-full w-[60%] bg-gradient-to-r from-purple-600 via-violet-500 to-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.6)]" />
                   </div>
                 </div>
               ) : item.type === "data" ? (
